@@ -110,7 +110,10 @@ async function withFixtures(options, testSuite) {
           '\n',
         )}`;
         if (failOnConsoleError) {
-          throw new Error(errorMessage);
+          errors.forEach((err) => {
+            console.log(err.message, err.stack);
+          });
+          throw new Error(errorMessage, { cause: errors });
         } else {
           console.error(new Error(errorMessage));
         }

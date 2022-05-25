@@ -12,8 +12,9 @@ export default class ConfirmSendToken extends Component {
 
   handleEdit(confirmTransactionData) {
     const { editTransaction, history } = this.props;
-    editTransaction(confirmTransactionData);
-    history.push(SEND_ROUTE);
+    editTransaction(confirmTransactionData).then(() => {
+      history.push(SEND_ROUTE);
+    });
   }
 
   render() {
