@@ -6,7 +6,6 @@ import {
   updateSendHexData,
 } from '../../../../ducks/send';
 import SendRowWrapper from '../send-row-wrapper';
-import Dialog from '../../../../components/ui/dialog';
 import { useI18nContext } from '../../../../hooks/useI18nContext';
 
 const SendHexDataRow = () => {
@@ -23,24 +22,12 @@ const SendHexDataRow = () => {
     dispatch(updateSendHexData(hexData));
   };
 
-  const renderError = () => {
-    return (
-      <Dialog
-        type="error"
-        className="send__error-dialog"
-        data-testid="hex-data-error-message"
-      >
-        {t('invalidHexString')}
-      </Dialog>
-    );
-  };
-
   return (
     <>
       <SendRowWrapper
         label={`${t('hexData')}`}
-        showError={false}
-        errorType="amount"
+        showError={showHexDataError}
+        errorType="hexData"
       >
         <textarea
           onInput={onInput}
@@ -50,7 +37,6 @@ const SendHexDataRow = () => {
           data-testid="hex-data-area"
         />
       </SendRowWrapper>
-      {showHexDataError && renderError()}
     </>
   );
 };
