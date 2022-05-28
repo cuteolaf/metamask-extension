@@ -194,7 +194,8 @@ describe('Send Slice', () => {
         };
         const result = sendReducer(initialState, action);
 
-        expect(result.userInputHexData).toStrictEqual(action.payload);
+        expect(result.userInputHexData.input).toStrictEqual(action.payload);
+        expect(result.userInputHexData.error).toStrictEqual('invalidHexString');
       });
     });
 
@@ -1098,7 +1099,10 @@ describe('Send Slice', () => {
             amount: {
               value: '',
             },
-            userInputHexData: '',
+            userInputHexData: {
+              input: '',
+              error: null,
+            },
           },
         };
         const store = mockStore(sendState);
@@ -1906,6 +1910,10 @@ describe('Send Slice', () => {
           gas: {
             gasLimit: GAS_LIMITS.SIMPLE,
           },
+          userInputHexData: {
+            input: '',
+            error: null,
+          },
         },
       };
 
@@ -2515,14 +2523,18 @@ describe('Send Slice', () => {
       });
 
       it('has a selector to get the user entered hex data', () => {
-        expect(getSendHexData({ send: initialState })).toBeNull();
+        expect(getSendHexData({ send: initialState }).error).toBeNull();
+        expect(getSendHexData({ send: initialState }).input).toStrictEqual('');
         expect(
           getSendHexData({
             send: {
               ...initialState,
-              userInputHexData: '0x0',
+              userInputHexData: {
+                input: '0x0',
+                error: null,
+              },
             },
-          }),
+          }).input,
         ).toBe('0x0');
       });
 
