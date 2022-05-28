@@ -46,6 +46,7 @@ export default class SendRowErrorMessage extends Component {
       <div
         className={classnames('send-v2__error', {
           'send-v2__error-amount': errorType === 'amount',
+          'send-v2__error-hex-data': errorType === 'hexData',
         })}
       >
         {errorMessage}

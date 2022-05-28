@@ -515,6 +515,11 @@
     margin-top: 5px;
   }
 
+  &__error-hex-data {
+    margin-top: 5px;
+    font-size: 0.7em;
+  }
+
   &__warning {
     @include H7;
 
