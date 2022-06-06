@@ -305,7 +305,7 @@ export const RECIPIENT_SEARCH_MODES = {
  * @property {string} address - The fully qualified address of the recipient.
  *  This is set after the recipient.userInput is validated, the userInput field
  *  is quickly updated to avoid delay between keystrokes and seeing the input
- *  field updated. After a debounc the address typed is validated and then the
+ *  field updated. After a debounce the address typed is validated and then the
  *  address field is updated. The address field is also set when the user
  *  selects a contact or account from the list, or an ENS resolution when
  *  typing ENS names.
@@ -1296,50 +1296,52 @@ const slice = createSlice({
       const draftTransaction =
         state.draftTransactions[state.currentTransactionUUID];
 
-      if (
-        state.recipientMode === RECIPIENT_SEARCH_MODES.MY_ACCOUNTS ||
-        state.recipientInput === '' ||
-        state.recipientInput === null
-      ) {
-        draftTransaction.recipient.error = null;
-        draftTransaction.recipient.warning = null;
-      } else {
-        const isSendingToken =
-          draftTransaction.asset.type === ASSET_TYPES.TOKEN ||
-          draftTransaction.asset.type === ASSET_TYPES.COLLECTIBLE;
-        const { chainId, tokens, tokenAddressList } = action.payload;
+      if (draftTransaction) {
         if (
-          isBurnAddress(state.recipientInput) ||
-          (!isValidHexAddress(state.recipientInput, {
-            mixedCaseUseChecksum: true,
-          }) &&
-            !isValidDomainName(state.recipientInput))
+          state.recipientMode === RECIPIENT_SEARCH_MODES.MY_ACCOUNTS ||
+          state.recipientInput === '' ||
+          state.recipientInput === null
         ) {
-          draftTransaction.recipient.error = isDefaultMetaMaskChain(chainId)
-            ? INVALID_RECIPIENT_ADDRESS_ERROR
-            : INVALID_RECIPIENT_ADDRESS_NOT_ETH_NETWORK_ERROR;
-        } else if (
-          isSendingToken &&
-          isOriginContractAddress(
-            state.recipientInput,
-            draftTransaction.asset.details.address,
-          )
-        ) {
-          draftTransaction.recipient.error = CONTRACT_ADDRESS_ERROR;
-        } else {
           draftTransaction.recipient.error = null;
-        }
-        if (
-          isSendingToken &&
-          isValidHexAddress(state.recipientInput) &&
-          (tokenAddressList.find((address) =>
-            isEqualCaseInsensitive(address, state.recipientInput),
-          ) ||
-            checkExistingAddresses(state.recipientInput, tokens))
-        ) {
-          draftTransaction.recipient.warning = KNOWN_RECIPIENT_ADDRESS_WARNING;
-        } else {
           draftTransaction.recipient.warning = null;
+        } else {
+          const isSendingToken =
+            draftTransaction.asset.type === ASSET_TYPES.TOKEN ||
+            draftTransaction.asset.type === ASSET_TYPES.COLLECTIBLE;
+          const { chainId, tokens, tokenAddressList } = action.payload;
+          if (
+            isBurnAddress(state.recipientInput) ||
+            (!isValidHexAddress(state.recipientInput, {
+              mixedCaseUseChecksum: true,
+            }) &&
+              !isValidDomainName(state.recipientInput))
+          ) {
+            draftTransaction.recipient.error = isDefaultMetaMaskChain(chainId)
+              ? INVALID_RECIPIENT_ADDRESS_ERROR
+              : INVALID_RECIPIENT_ADDRESS_NOT_ETH_NETWORK_ERROR;
+          } else if (
+            isSendingToken &&
+            isOriginContractAddress(
+              state.recipientInput,
+              draftTransaction.asset.details.address,
+            )
+          ) {
+            draftTransaction.recipient.error = CONTRACT_ADDRESS_ERROR;
+          } else {
+            draftTransaction.recipient.error = null;
+          }
+          if (
+            isSendingToken &&
+            isValidHexAddress(state.recipientInput) &&
+            (tokenAddressList.find((address) =>
+              isEqualCaseInsensitive(address, state.recipientInput),
+            ) ||
+              checkExistingAddresses(state.recipientInput, tokens))
+          ) {
+            draftTransaction.recipient.warning = KNOWN_RECIPIENT_ADDRESS_WARNING;
+          } else {
+            draftTransaction.recipient.warning = null;
+          }
         }
       }
     },
