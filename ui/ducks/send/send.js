@@ -849,6 +849,8 @@ const slice = createSlice({
       state.draftTransactions[state.currentTransactionUUID] = action.payload;
       if (action.payload.id) {
         state.stage = SEND_STAGES.EDIT;
+      } else {
+        state.stage = SEND_STAGES.ADD_RECIPIENT;
       }
     },
     /**
@@ -1606,10 +1608,6 @@ const slice = createSlice({
             },
           });
         }
-        state.stage =
-          state.stage === SEND_STAGES.INACTIVE
-            ? SEND_STAGES.ADD_RECIPIENT
-            : state.stage;
         slice.caseReducers.validateAmountField(state);
         slice.caseReducers.validateGasField(state);
         slice.caseReducers.validateSendState(state);
@@ -1773,7 +1771,10 @@ export function updateSendAmount(amount) {
  * @param {TokenDetails} [payload.details] - ERC20 details if sending TOKEN asset
  * @returns {ThunkAction<void>}
  */
-export function updateSendAsset({ type, details: providedDetails }) {
+export function updateSendAsset(
+  { type, details: providedDetails },
+  { skipComputeEstimatedGasLimit = false } = {},
+) {
   return async (dispatch, getState) => {
     const state = getState();
     const draftTransaction =
@@ -1818,14 +1819,14 @@ export function updateSendAsset({ type, details: providedDetails }) {
       };
       if (
         details.standard === TOKEN_STANDARDS.ERC1155 &&
-        type === TOKEN_STANDARDS.COLLECTIBLE
+        type === ASSET_TYPES.COLLECTIBLE
       ) {
         throw new Error('Sends of ERC1155 tokens are not currently supported');
       } else if (
         details.standard === TOKEN_STANDARDS.ERC1155 ||
         details.standard === TOKEN_STANDARDS.ERC721
       ) {
-        if (type === TOKEN_STANDARDS.TOKEN) {
+        if (type === ASSET_TYPES.TOKEN && process.env.COLLECTIBLES_V1) {
           dispatch(
             showModal({
               name: 'CONVERT_TOKEN_TO_NFT',
@@ -1877,7 +1878,9 @@ export function updateSendAsset({ type, details: providedDetails }) {
 
       await dispatch(actions.updateAsset(asset));
     }
-    await dispatch(computeEstimatedGasLimit());
+    if (skipComputeEstimatedGasLimit === false) {
+      await dispatch(computeEstimatedGasLimit());
+    }
   };
 }
 
@@ -2223,7 +2226,12 @@ export function editExistingTransaction(assetType, transactionId) {
           ],
         }),
       );
-      await dispatch(updateSendAsset({ type: ASSET_TYPES.NATIVE }));
+      await dispatch(
+        updateSendAsset(
+          { type: ASSET_TYPES.NATIVE },
+          { skipComputeEstimatedGasLimit: true },
+        ),
+      );
     } else {
       const tokenData = parseStandardTokenTransactionData(
         transaction.txParams.data,
@@ -2268,13 +2276,18 @@ export function editExistingTransaction(assetType, transactionId) {
       );
 
       await dispatch(
-        updateSendAsset({
-          type: assetType,
-          details: {
-            address: transaction.txParams.to,
-            tokenId: getTokenValueParam(tokenData),
+        updateSendAsset(
+          {
+            type: assetType,
+            details: {
+              address: transaction.txParams.to,
+              ...(assetType === ASSET_TYPES.COLLECTIBLE
+                ? { tokenId: getTokenValueParam(tokenData) }
+                : {}),
+            },
           },
-        }),
+          { skipComputeEstimatedGasLimit: true },
+        ),
       );
     }
 
