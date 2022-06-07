@@ -27,9 +27,12 @@ import {
 } from '../../pages/send/send.utils';
 import { BURN_ADDRESS } from '../../../shared/modules/hexstring-utils';
 import { TOKEN_STANDARDS } from '../../helpers/constants/common';
+import {
+  getInitialStateWithExistingTxState,
+  INITIAL_TEST_STATE_FOR_EXISTING_DRAFT,
+} from '../../../test/jest/mocks';
 import sendReducer, {
   initialState,
-  draftTransactionInitialState,
   initializeSendState,
   updateSendAmount,
   updateSendAsset,
@@ -74,45 +77,6 @@ import sendReducer, {
 import { editExistingTransaction } from '.';
 
 const mockStore = createMockStore([thunk]);
-
-const INITIAL_TEST_STATE_FOR_EXISTING_DRAFT = {
-  ...initialState,
-  currentTransactionUUID: 'test-uuid',
-  draftTransactions: {
-    'test-uuid': {
-      ...draftTransactionInitialState,
-    },
-  },
-};
-
-const getInitialStateWithExistingTxState = (draftTxState) => ({
-  ...INITIAL_TEST_STATE_FOR_EXISTING_DRAFT,
-  draftTransactions: {
-    'test-uuid': {
-      ...draftTransactionInitialState,
-      ...draftTxState,
-      amount: {
-        ...draftTransactionInitialState.amount,
-        ...draftTxState.amount,
-      },
-      asset: {
-        ...draftTransactionInitialState.asset,
-        ...draftTxState.asset,
-      },
-      gas: {
-        ...draftTransactionInitialState.gas,
-        ...draftTxState.gas,
-      },
-      recipient: {
-        ...draftTransactionInitialState.recipient,
-        ...draftTxState.recipient,
-      },
-      history: draftTxState.history ?? [],
-      // Use this key if you want to console.log inside the send.js file.
-      test: draftTxState.test ?? 'yo',
-    },
-  },
-});
 
 jest.mock('./send', () => {
   const actual = jest.requireActual('./send');
