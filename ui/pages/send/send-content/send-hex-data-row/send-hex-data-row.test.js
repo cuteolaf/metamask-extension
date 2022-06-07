@@ -60,7 +60,7 @@ describe('send-hex-data-row container', () => {
       );
     });
 
-    it('should enter valid hex in textarea', () => {
+    it('should not render invalid hex error when valid hex is entered in textarea', () => {
       const component = renderComponent();
       const textArea = component.getByTestId('hex-data-area');
       expect(textArea).toBeDefined();
@@ -68,7 +68,7 @@ describe('send-hex-data-row container', () => {
       expect(component.queryByTestId('hex-data-error-message')).toBeNull();
     });
 
-    it('should enter invalid hex in textarea', async () => {
+    it('should render invalid hex data error when invalid hex is entered in textarea', async () => {
       const component = renderComponent();
       const textArea = component.getByTestId('hex-data-area');
       expect(textArea).toBeDefined();

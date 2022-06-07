@@ -2256,10 +2256,6 @@ export function getSendHexData(state) {
   return state[name].userInputHexData;
 }
 
-export function isHexDataError(state) {
-  return Boolean(state[name].userInputHexData.error);
-}
-
 export function getDraftTransactionID(state) {
   return state[name].id;
 }

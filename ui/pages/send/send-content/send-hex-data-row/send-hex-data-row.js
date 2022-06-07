@@ -1,19 +1,15 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  getSendHexData,
-  isHexDataError,
-  updateSendHexData,
-} from '../../../../ducks/send';
+import { getSendHexData, updateSendHexData } from '../../../../ducks/send';
 import SendRowWrapper from '../send-row-wrapper';
 import { useI18nContext } from '../../../../hooks/useI18nContext';
 
 const SendHexDataRow = () => {
   const t = useI18nContext();
 
-  const data = useSelector(getSendHexData);
+  const { input, error } = useSelector(getSendHexData);
 
-  const showHexDataError = useSelector(isHexDataError);
+  const showHexDataError = Boolean(error);
 
   const dispatch = useDispatch();
 
@@ -33,7 +29,7 @@ const SendHexDataRow = () => {
           onInput={onInput}
           placeholder={t('optional')}
           className="send-v2__hex-data__input"
-          defaultValue={data.input || ''}
+          defaultValue={input || ''}
           data-testid="hex-data-area"
         />
       </SendRowWrapper>
