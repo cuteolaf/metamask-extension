@@ -241,7 +241,7 @@ describe('DetectTokensController', function () {
         ),
       );
 
-    await tokensController.removeAndIgnoreToken(tokenAddressToSkip);
+    await tokensController.ignoreTokens(tokenAddressToSkip);
     await controller.detectNewTokens();
 
     assert.deepEqual(tokensController.state.tokens, [
